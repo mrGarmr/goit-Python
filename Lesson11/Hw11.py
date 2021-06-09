@@ -1,10 +1,10 @@
 import re
-from collections import UserDict,UserList
+from collections import UserList
 from datetime import datetime,timedelta,date
 
 class Field:
     def __init__(self,value):
-        self.__value=None
+        self.__value=value
         #self.value=value
     @property
     def value(self):
@@ -14,24 +14,21 @@ class Field:
     def value(self,new_value):
         self.__value=new_value
 
-class AddressBook(UserDict):
+class AddressBook(UserList):
+    
+    data = []
+    
     def add_record(self, record):
-        self.data[record.name.value]=record
-    def __str__(self):
-        result=''
-        for key,values in self.data.items():
-            result+=f'{key}:\n{20*"="}\n{str(value)}\n'
-            return result
-    def iterator(self,item_n):
+        self.data.append(record)
+
+        
+    def iterator(self,n):
         counter=0
         result=''
-        for key,values in self.data.items():
-            result+=f'{key}:\n{20*"="}\n{str(value)}\n'
-            counter+=1
-            if counter>=item_n:
-                yield result
-                counter=0
-                result=''
+        
+        while counter < n:
+            result += next(self.data)
+        yield result
 
         
 class Birthday(Field):
@@ -52,15 +49,21 @@ class Birthday(Field):
             print("Incorrect format, expected day.month.year(Example:25.12.1970)")
 
 class Record:
-    def __init__(self,name,phone='', birthday=None):
-        self.name=name
-        self.phone=phone
-        self.phones=[]
-        self.new_phone=''
-        self.birthday=birthday
+    def __init__(self,name,phones=None, birthday=None):
+        #self.name = name
+        self.phones = []
+        #self.birthday = birthday
+        self.user = {'Name': name.name, 'Phones': self.phones, 'Birthday': birthday}
         
     def add_phone(self, phone):
-        self.phones.append(phone)
+        phone=str(phone)
+        try:
+            num=re.match('[+]?[0-9]{12}', phone)
+            if num:
+                self.phones.append(phone)
+            
+        except:
+            print('Phone must start with + and have 12 digits. Example +380501234567 ADD')          
 
     def days_to_birthday(self):
         if self.birthday:
@@ -73,7 +76,7 @@ class Record:
             else:
                 days_left=(bday-today_d)
             return days_left.days
-    
+        
 
     def remove_phone(self,phone):
         for i in range(len(self.phones)):
@@ -87,29 +90,46 @@ class Record:
 
 class Name(Field):
     def __init__(self,name):
-        
         self.name=name
+        
+  
 
 class Phone(Field):
     def __init__(self,phone):
-        self.__phone=''
-        self.phone=phone
+        phones=[]
+        self.phones =list()
+        self.__phone=phone
+        
     @property  
     def phone(self):
         return self.__phone
     @phone.setter    
     def phone(self,value):
-        if re.match(r'[+][0-9]{12}',value):
-            self__phone=value[:13]
+        self.__phone=''
+        if re.match('[+]?[0-9]{12}',value):
+            self.__phone=value
         else:
-            print('Phone must start with + and have 12 digits. Example +380501234567')
+            print('Phone must start with + and have 12 digits. Example +380501234567 SETT')          
+    
+    #def __str__(self):
+        #return self.phone
+    def __repr__(self):
+        return self.phone
 
 
-# name=Name('Vova')
-# phone=Phone('+380501558911')
-# phone_1=Phone('+380637007500')
-# record_1=Record(name, birthday='05.04.1987')
-# record_1.add_phone(phone)
-# record_1.add_phone(phone_1)
+book=AddressBook()
 
-# print(record_1.days_to_birthday())
+name2=Name('Vova')
+phone=Phone('+380501558911')
+phone_1=Phone('+380637007500')
+record_1=Record(name2, phone, birthday='05.04.1987')
+record_1.add_phone(phone)
+record_1.add_phone(phone_1)
+book.add_record(record_1.user)
+name2=Name('Vasj')
+phone=Phone('+380505558575')
+record_1=Record(name2, phone)
+record_1.add_phone(phone)
+book.add_record(record_1.user)
+
+print(book)
