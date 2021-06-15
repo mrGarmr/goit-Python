@@ -42,17 +42,21 @@ class AddressBook(UserList):
                         
         return result
                     
-                
         
-    def iterator(self,n=10):
-        counter=0
-        result=''
-        
-        while counter < n:
-            result += next(self.data)
-        yield result
+    def iterator(self,n=2):
+        f=1
+        k = 0
+        result=[]
+        while k < n:
 
-        
+            result=self.data[k:f]
+            k += 1
+            f+=1
+            if result:
+                yield result
+            else:
+                break
+    
 class Birthday(Field):
     def __init__(self,value):
         self.__birthday = None
@@ -98,7 +102,6 @@ class Record:
                 days_left=(bday-today_d)
             return days_left.days
         
-
     def remove_phone(self,phone):
         for i in range(len(self.phones)):
             if self.phones[i].phone == phone:
@@ -185,8 +188,8 @@ def add():
             
         elif decicion=='n' or decicion=='not':
             book.add_record(record1.user)
-            esc=False
-            return esc
+            say='Successfully changed'
+            return say
 
     
 @error_handler     
@@ -261,12 +264,25 @@ def save():
 
 @error_handler
 def show():
-    global path, book
-    return book
+    #counter=0
+    print(79*'_')
+    print('|                  Name                   |       Phones         |  Birthday  |')
+    print(79*'_')
+    for i in book:
+        print(f'| {i["Name"]:<40}| { i["Phones"][0] if len(i["Phones"])>=1 else " ":<20} | {i["Birthday"]if i["Birthday"] else " ":<11}|')
+        if len(i["Phones"]) > 1:
+            for elem in i["Phones"][1:]:
+                print(f'|                                         | {elem: <20} |            |')
+        
+        #counter+=1
+        print(79*'_')
+     
 
 def help_func():
-    return print('Type "add" to add new contact\nType "change" to change contact\'s phone, name or birthday.\nType "find" to see information that you are looking for.\nType "show" to show you all phonebook.\nType "save" to save and exit.\nType "exit" to exit')
+    print(40*'*')
+    print('*Type "add"    to add new contact.\n*Type "change" to change contact\'s phone, name or birthday.\n*Type "find"   to see information that you are looking for.\n*Type "show"   to show you all phonebook.\n*Type "save"   to save and exit.\n*Type "exit"   to exit')
 
+    return (40*'*')
 @error_handler   
 def handler(user_input):
     if user_input in ANSWEARS.keys():
@@ -306,7 +322,7 @@ def main():
             print('Wrong command.')
 
     while esc_e:
-        user_input=input('What do you want to do? Type help for additional commands.\n')
+        user_input=input('What do you want to do? Type "help" for additional commands.\n')
         result=handler(user_input)
         if result:
             print(result)
